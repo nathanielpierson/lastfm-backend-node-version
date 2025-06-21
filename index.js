@@ -39,7 +39,13 @@ app.get("/top-tracks", async (req, res) => {
         api_key: process.env.LASTFM_API_KEY,
         format: 'json'
       }
-    });
+    }
+    );
+    const tracks = response.data.toptracks;
+    console.log(tracks.track[0]);
+    console.log(tracks.track.length);
+    // const trackNames = tracks.map(tracks => tracks.name);
+    // console.log(trackNames);
 
     res.json(response.data);
   } catch (err) {
