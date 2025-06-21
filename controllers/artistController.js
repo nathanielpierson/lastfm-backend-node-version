@@ -2,7 +2,6 @@
 
 export async function getArtistInfo(req, res) {
   const { name } = req.query;
-
   if (!name) {
     return res.status(400).json({ error: "Missing artist name" });
   }
