@@ -1,5 +1,3 @@
-// routes/artistRoutes.js
-
 import express from "express";
 import { getArtistInfo } from "../controllers/artistController.js";
 import { getTopTracks } from "../controllers/topTracksController.js";
