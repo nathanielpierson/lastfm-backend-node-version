@@ -5,6 +5,7 @@ import axios from "axios";
 
 // Import route modules
 import artistRoutes from "./routes/artistRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(express.json());
 
 // Route bindings
 app.use("/", artistRoutes);
+app.use("/", userRoutes);
 
 // Root route (optional)
 app.get("/", (req, res) => {

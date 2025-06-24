@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const getWeeklyAlbumChart = async (req, res) => {
-  const { user, from, to } = req.query;
+export async function getWeeklyAlbumChart(req, res) {
+  const { user } = req.query;
 
   if (!user) {
     return res.status(400).json({ error: 'User parameter is required' });
@@ -15,9 +15,6 @@ const getWeeklyAlbumChart = async (req, res) => {
       format: 'json',
     };
 
-    if (from) params.from = from;
-    if (to) params.to = to;
-
     const response = await axios.get('http://ws.audioscrobbler.com/2.0/', { params });
 
     const albums = response.data.weeklyalbumchart.album;
@@ -27,6 +24,4 @@ const getWeeklyAlbumChart = async (req, res) => {
     console.error('Error fetching weekly album chart:', error.message);
     res.status(500).json({ error: 'Failed to fetch data from Last.fm' });
   }
-};
-
-module.exports = { getWeeklyAlbumChart };
+}
