@@ -3,6 +3,8 @@ import axios from "axios";
 export async function getTopAlbums(req, res) {
   const { user } = req.query;
   const { period } = req.query;
+  const { limit } = req.query;
+  const { page } = req.query;
 
   if (!user) {
     return res.status(400).json({ error: 'User parameter is required' });
@@ -13,12 +15,15 @@ export async function getTopAlbums(req, res) {
       method: 'user.getTopAlbums',
       user,
       period,
+      limit,
+      page,
       api_key: process.env.LASTFM_API_KEY,
       format: 'json',
     };
 
     const response = await axios.get('http://ws.audioscrobbler.com/2.0/', { params });
 
+    console.log(JSON.stringify(response.data));
     const albums = response.data.topalbums.album;
     console.log(albums[0].playcount);
     res.json(albums);
