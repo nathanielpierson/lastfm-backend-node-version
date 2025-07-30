@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start:dev": "nodemon ./index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "setup-db": "node scripts/setupDatabase.js"
   },
   "dependencies": {
     "axios": "^1.6.8",

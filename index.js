@@ -19,7 +19,7 @@ app.use(express.json());
 
 // Route bindings
 app.use("/", artistRoutes);
-app.use("/", userRoutes);
+app.use("/api/users", userRoutes);
 
 // Root route (optional)
 app.get("/", (req, res) => {

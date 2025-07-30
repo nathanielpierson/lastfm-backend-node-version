@@ -1,5 +1,0 @@
-function albumsController() {
-const create = () => {
-
-}
-}
