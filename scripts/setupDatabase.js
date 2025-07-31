@@ -32,7 +32,7 @@ async function setupDatabase() {
       __dirname,
       "..",
       "database",
-      "local_album_data.sql"
+      "artists_and_albums.sql"
     );
     const sqlContent = fs.readFileSync(sqlPath, "utf8");
 
@@ -40,7 +40,10 @@ async function setupDatabase() {
     await pool.query(sqlContent);
 
     console.log("✅ Database setup completed successfully!");
-    console.log('📊 Table "local_album_data" has been created.');
+    console.log('📊 Tables "artists" and "albums" have been created.');
+    console.log(
+      "🔗 Foreign key relationship established between artists and albums."
+    );
   } catch (error) {
     console.error("❌ Error setting up database:", error.message);
     process.exit(1);

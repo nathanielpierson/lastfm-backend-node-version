@@ -23,7 +23,7 @@
 //     const client = await pool.connect();
 
 //     for (const album of albums) {
-//       const title = album.name;
+//       const title = album.title;
 //       const artist_name = album.artist['#text'];
 //       const play_count = parseInt(album.playcount);
 

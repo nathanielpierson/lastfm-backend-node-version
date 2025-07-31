@@ -7,7 +7,7 @@ export async function fetchRecentTracks(username, period) {
 
   const params = {
     method: "user.getTopAlbums",
-    user: username,
+    user: "frogdunker",
     period: period,
     api_key: API_KEY,
     format: "json",

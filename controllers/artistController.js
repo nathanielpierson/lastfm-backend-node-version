@@ -1,21 +1,36 @@
-// controllers/artistController.js
+import { getAllArtistsService } from "../services/artistService.js";
+import { getAlbumsByArtistService } from "../services/albumService.js";
 
-export async function getArtistInfo(req, res) {
-  const { name } = req.query;
-  if (!name) {
-    return res.status(400).json({ error: "Missing artist name" });
+const handleResponse = (res, status, message, data = null) => {
+  res.status(status).json({
+    status,
+    message,
+    data,
+  });
+};
+
+export const getAllArtists = async (req, res, next) => {
+  try {
+    const artists = await getAllArtistsService();
+    handleResponse(res, 200, "Artists retrieved successfully", artists);
+  } catch (error) {
+    console.error("Error fetching artists:", error);
+    handleResponse(res, 500, "Error fetching artists", {
+      error: error.message,
+    });
   }
+};
+
+export const getArtistWithAlbums = async (req, res, next) => {
+  const { artistId } = req.params;
 
   try {
-    // TODO: Call Last.fm API to get artist info using name
-    const artistData = {
-      name: "Placeholder Artist",
-      bio: "This is where the artist bio will go.",
-      topTracks: [], // Optional: fill in later
-    };
-
-    res.json(artistData);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch artist info" });
+    const albums = await getAlbumsByArtistService(artistId);
+    handleResponse(res, 200, "Artist albums retrieved successfully", albums);
+  } catch (error) {
+    console.error("Error fetching artist albums:", error);
+    handleResponse(res, 500, "Error fetching artist albums", {
+      error: error.message,
+    });
   }
-}
+};

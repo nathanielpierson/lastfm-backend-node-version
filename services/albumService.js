@@ -1,0 +1,121 @@
+import { Pool } from "pg";
+
+// Configure database connection
+let pool;
+
+if (process.env.DATABASE_URL) {
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+  });
+} else {
+  pool = new Pool({
+    host: process.env.DB_HOST || "localhost",
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME || "lastfm_api_project_db",
+    user: process.env.DB_USER || "postgres",
+    password: process.env.DB_PASSWORD || "",
+  });
+}
+
+export const createAlbumService = async (albumData) => {
+  const {
+    title,
+    artist_id,
+    one_week,
+    one_month,
+    three_month,
+    six_month,
+    twelve_month,
+    play_count_total,
+  } = albumData;
+
+  const query = `
+    INSERT INTO albums 
+    (title, artist_id, one_week, one_month, three_month, six_month, twelve_month, play_count_total)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    ON CONFLICT (title, artist_id) DO UPDATE SET
+      one_week = EXCLUDED.one_week,
+      one_month = EXCLUDED.one_month,
+      three_month = EXCLUDED.three_month,
+      six_month = EXCLUDED.six_month,
+      twelve_month = EXCLUDED.twelve_month,
+      play_count_total = EXCLUDED.play_count_total,
+      updated_at = NOW()
+    RETURNING *
+  `;
+
+  const values = [
+    title,
+    artist_id,
+    one_week,
+    one_month,
+    three_month,
+    six_month,
+    twelve_month,
+    play_count_total,
+  ];
+
+  try {
+    const result = await pool.query(query, values);
+    return result.rows[0];
+  } catch (error) {
+    throw new Error(`Error creating album: ${error.message}`);
+  }
+};
+
+export const getAllAlbumsWithArtistsService = async () => {
+  const query = `
+    SELECT 
+      a.id,
+      a.title,
+      a.one_week,
+      a.one_month,
+      a.three_month,
+      a.six_month,
+      a.twelve_month,
+      a.play_count_total,
+      a.created_at,
+      a.updated_at,
+      ar.id as artist_id,
+      ar.name as artist_name
+    FROM albums a
+    JOIN artists ar ON a.artist_id = ar.id
+    ORDER BY a.created_at DESC
+  `;
+
+  try {
+    const result = await pool.query(query);
+    return result.rows;
+  } catch (error) {
+    throw new Error(`Error fetching albums: ${error.message}`);
+  }
+};
+
+export const getAlbumsByArtistService = async (artistId) => {
+  const query = `
+    SELECT 
+      a.id,
+      a.title,
+      a.one_week,
+      a.one_month,
+      a.three_month,
+      a.six_month,
+      a.twelve_month,
+      a.play_count_total,
+      a.created_at,
+      a.updated_at,
+      ar.id as artist_id,
+      ar.name as artist_name
+    FROM albums a
+    JOIN artists ar ON a.artist_id = ar.id
+    WHERE a.artist_id = $1
+    ORDER BY a.play_count_total DESC
+  `;
+
+  try {
+    const result = await pool.query(query, [artistId]);
+    return result.rows;
+  } catch (error) {
+    throw new Error(`Error fetching albums by artist: ${error.message}`);
+  }
+};

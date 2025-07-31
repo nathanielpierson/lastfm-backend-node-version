@@ -1,8 +1,12 @@
 import { fetchRecentTracks } from "../services/lastfmService.js";
 import {
-  createLocalAlbumDataService,
-  getLocalAlbumDataService,
-} from "../services/localAlbumDataService.js";
+  createArtistService,
+  findArtistByNameService,
+} from "../services/artistService.js";
+import {
+  createAlbumService,
+  getAllAlbumsWithArtistsService,
+} from "../services/albumService.js";
 
 const handleResponse = (res, status, message, data = null) => {
   res.status(status).json({
@@ -49,12 +53,12 @@ export const createLocalAlbumData = async (req, res, next) => {
       const albums = periodData[mapping.period];
 
       for (const album of albums) {
-        const albumKey = `${album.name}-${album.artist.name}`;
+        const albumKey = `${album.title}-${album.artist.name}`;
         const playCount = parseInt(album.playcount) || 0;
 
         if (!albumMap.has(albumKey)) {
           albumMap.set(albumKey, {
-            title: album.name,
+            title: album.title,
             artist_name: album.artist.name,
             one_week: 0,
             one_month: 0,
@@ -75,7 +79,19 @@ export const createLocalAlbumData = async (req, res, next) => {
     const savedAlbums = [];
 
     for (const albumData of transformedAlbums) {
-      const savedAlbum = await createLocalAlbumDataService(albumData);
+      // First, create or find the artist
+      let artist = await findArtistByNameService(albumData.artist_name);
+      if (!artist) {
+        artist = await createArtistService(albumData.artist_name);
+      }
+
+      // Then create the album with the artist_id
+      const albumWithArtistId = {
+        ...albumData,
+        artist_id: artist.id,
+      };
+
+      const savedAlbum = await createAlbumService(albumWithArtistId);
       savedAlbums.push(savedAlbum);
     }
 
@@ -93,7 +109,7 @@ export const createLocalAlbumData = async (req, res, next) => {
 
 export const getLocalAlbumData = async (req, res, next) => {
   try {
-    const albumData = await getLocalAlbumDataService();
+    const albumData = await getAllAlbumsWithArtistsService();
     handleResponse(
       res,
       200,
@@ -105,5 +121,15 @@ export const getLocalAlbumData = async (req, res, next) => {
     handleResponse(res, 500, "Error fetching local album data", {
       error: error.message,
     });
+  }
+};
+
+export const getLocalAlbumDataRaw = async (req, res, next) => {
+  try {
+    const albumData = await getAllAlbumsWithArtistsService();
+    res.status(200).json(albumData);
+  } catch (error) {
+    console.error("Error fetching local album data:", error);
+    res.status(500).json({ error: error.message });
   }
 };
