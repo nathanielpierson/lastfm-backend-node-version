@@ -74,12 +74,14 @@ export const getAllAlbumsWithArtistsService = async () => {
       a.six_month,
       a.twelve_month,
       a.play_count_total,
+      a.ignored,
       a.created_at,
       a.updated_at,
       ar.id as artist_id,
       ar.name as artist_name
     FROM albums a
     JOIN artists ar ON a.artist_id = ar.id
+    WHERE a.ignored = FALSE
     ORDER BY a.created_at DESC
   `;
 
@@ -102,13 +104,14 @@ export const getAlbumsByArtistService = async (artistId) => {
       a.six_month,
       a.twelve_month,
       a.play_count_total,
+      a.ignored,
       a.created_at,
       a.updated_at,
       ar.id as artist_id,
       ar.name as artist_name
     FROM albums a
     JOIN artists ar ON a.artist_id = ar.id
-    WHERE a.artist_id = $1
+    WHERE a.artist_id = $1 AND a.ignored = FALSE
     ORDER BY a.play_count_total DESC
   `;
 
@@ -117,5 +120,50 @@ export const getAlbumsByArtistService = async (artistId) => {
     return result.rows;
   } catch (error) {
     throw new Error(`Error fetching albums by artist: ${error.message}`);
+  }
+};
+
+export const updateAlbumIgnoredStatusService = async (albumId, ignored) => {
+  const query = `
+    UPDATE albums 
+    SET ignored = $2, updated_at = NOW()
+    WHERE id = $1
+    RETURNING *
+  `;
+
+  try {
+    const result = await pool.query(query, [albumId, ignored]);
+    return result.rows[0];
+  } catch (error) {
+    throw new Error(`Error updating album ignored status: ${error.message}`);
+  }
+};
+
+export const getAllAlbumsWithArtistsIncludingIgnoredService = async () => {
+  const query = `
+    SELECT 
+      a.id,
+      a.title,
+      a.one_week,
+      a.one_month,
+      a.three_month,
+      a.six_month,
+      a.twelve_month,
+      a.play_count_total,
+      a.ignored,
+      a.created_at,
+      a.updated_at,
+      ar.id as artist_id,
+      ar.name as artist_name
+    FROM albums a
+    JOIN artists ar ON a.artist_id = ar.id
+    ORDER BY a.created_at DESC
+  `;
+
+  try {
+    const result = await pool.query(query);
+    return result.rows;
+  } catch (error) {
+    throw new Error(`Error fetching all albums: ${error.message}`);
   }
 };

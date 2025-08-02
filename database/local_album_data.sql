@@ -1,8 +1,8 @@
 -- Create local_album_data table
 CREATE TABLE IF NOT EXISTS local_album_data (
   id SERIAL PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  artist_name VARCHAR(255) NOT NULL,
+  title VARCHAR(255),
+  artist_name VARCHAR(255),
   one_week INTEGER DEFAULT 0,
   one_month INTEGER DEFAULT 0,
   three_month INTEGER DEFAULT 0,

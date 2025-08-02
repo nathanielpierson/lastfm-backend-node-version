@@ -1,7 +1,7 @@
 -- Create artists table
 CREATE TABLE IF NOT EXISTS artists (
   id SERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL UNIQUE,
+  name VARCHAR(255) UNIQUE,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS artists (
 -- Create albums table with foreign key to artists
 CREATE TABLE IF NOT EXISTS albums (
   id SERIAL PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  artist_id INTEGER NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+  title VARCHAR(255),
+  artist_id INTEGER REFERENCES artists(id) ON DELETE CASCADE,
   one_week INTEGER DEFAULT 0,
   one_month INTEGER DEFAULT 0,
   three_month INTEGER DEFAULT 0,
