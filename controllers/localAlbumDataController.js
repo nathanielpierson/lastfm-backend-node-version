@@ -18,6 +18,15 @@ const handleResponse = (res, status, message, data = null) => {
   });
 };
 
+// Helper function to extract medium image URL from Last.fm API response
+const extractMediumImageUrl = (album) => {
+  if (album.image && Array.isArray(album.image)) {
+    const mediumImage = album.image.find((img) => img.size === "medium");
+    return mediumImage ? mediumImage["#text"] : null;
+  }
+  return null;
+};
+
 export const createLocalAlbumData = async (req, res, next) => {
   const { username } = req.body;
 
@@ -72,11 +81,13 @@ export const createLocalAlbumData = async (req, res, next) => {
 
         const albumKey = `${albumTitle}-${artistName}`;
         const playCount = parseInt(album.playcount) || 0;
+        const imageUrl = extractMediumImageUrl(album);
 
         if (!albumMap.has(albumKey)) {
           albumMap.set(albumKey, {
             title: albumTitle,
             artist_name: artistName,
+            image_url: imageUrl,
             one_week: 0,
             one_month: 0,
             three_month: 0,
@@ -88,6 +99,11 @@ export const createLocalAlbumData = async (req, res, next) => {
 
         const albumData = albumMap.get(albumKey);
         albumData[mapping.field] = playCount;
+
+        // Update image_url if we don't have one yet
+        if (!albumData.image_url && imageUrl) {
+          albumData.image_url = imageUrl;
+        }
       }
     }
 

@@ -27,23 +27,22 @@ async function setupDatabase() {
   try {
     console.log("🔧 Setting up database...");
 
-    // Read the SQL file
-    const sqlPath = path.join(
-      __dirname,
-      "..",
-      "database",
-      "artists_and_albums.sql"
-    );
+    // Read the migration SQL file (handles both new and existing databases)
+    const sqlPath = path.join(__dirname, "..", "database", "migration.sql");
     const sqlContent = fs.readFileSync(sqlPath, "utf8");
 
-    // Execute the SQL
+    // Execute the migration SQL
     await pool.query(sqlContent);
 
-    console.log("✅ Database setup completed successfully!");
-    console.log('📊 Tables "artists" and "albums" have been created.');
+    console.log("✅ Database migration completed successfully!");
+    console.log('📊 Tables "artists" and "albums" are ready.');
     console.log(
       "🔗 Foreign key relationship established between artists and albums."
     );
+    console.log(
+      '🖼️ "image_url" column added to albums table for album artwork.'
+    );
+    console.log('🚫 "ignored" column added to albums table for filtering.');
   } catch (error) {
     console.error("❌ Error setting up database:", error.message);
     process.exit(1);

@@ -27,12 +27,13 @@ export const createAlbumService = async (albumData) => {
     six_month,
     twelve_month,
     play_count_total,
+    image_url,
   } = albumData;
 
   const query = `
     INSERT INTO albums 
-    (title, artist_id, one_week, one_month, three_month, six_month, twelve_month, play_count_total)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    (title, artist_id, one_week, one_month, three_month, six_month, twelve_month, play_count_total, image_url)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     ON CONFLICT (title, artist_id) DO UPDATE SET
       one_week = EXCLUDED.one_week,
       one_month = EXCLUDED.one_month,
@@ -40,6 +41,7 @@ export const createAlbumService = async (albumData) => {
       six_month = EXCLUDED.six_month,
       twelve_month = EXCLUDED.twelve_month,
       play_count_total = EXCLUDED.play_count_total,
+      image_url = EXCLUDED.image_url,
       updated_at = NOW()
     RETURNING *
   `;
@@ -53,6 +55,7 @@ export const createAlbumService = async (albumData) => {
     six_month,
     twelve_month,
     play_count_total,
+    image_url,
   ];
 
   try {
@@ -61,6 +64,28 @@ export const createAlbumService = async (albumData) => {
   } catch (error) {
     throw new Error(`Error creating album: ${error.message}`);
   }
+};
+
+// Helper function to format album data with nested artist structure
+const formatAlbumWithNestedArtist = (row) => {
+  return {
+    id: row.id,
+    title: row.title,
+    one_week: row.one_week,
+    one_month: row.one_month,
+    three_month: row.three_month,
+    six_month: row.six_month,
+    twelve_month: row.twelve_month,
+    play_count_total: row.play_count_total,
+    image_url: row.image_url,
+    ignored: row.ignored,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    artist: {
+      id: row.artist_id,
+      name: row.artist_name,
+    },
+  };
 };
 
 export const getAllAlbumsWithArtistsService = async () => {
@@ -74,6 +99,7 @@ export const getAllAlbumsWithArtistsService = async () => {
       a.six_month,
       a.twelve_month,
       a.play_count_total,
+      a.image_url,
       a.ignored,
       a.created_at,
       a.updated_at,
@@ -87,7 +113,7 @@ export const getAllAlbumsWithArtistsService = async () => {
 
   try {
     const result = await pool.query(query);
-    return result.rows;
+    return result.rows.map(formatAlbumWithNestedArtist);
   } catch (error) {
     throw new Error(`Error fetching albums: ${error.message}`);
   }
@@ -104,6 +130,7 @@ export const getAlbumsByArtistService = async (artistId) => {
       a.six_month,
       a.twelve_month,
       a.play_count_total,
+      a.image_url,
       a.ignored,
       a.created_at,
       a.updated_at,
@@ -117,7 +144,7 @@ export const getAlbumsByArtistService = async (artistId) => {
 
   try {
     const result = await pool.query(query, [artistId]);
-    return result.rows;
+    return result.rows.map(formatAlbumWithNestedArtist);
   } catch (error) {
     throw new Error(`Error fetching albums by artist: ${error.message}`);
   }
@@ -150,6 +177,7 @@ export const getAllAlbumsWithArtistsIncludingIgnoredService = async () => {
       a.six_month,
       a.twelve_month,
       a.play_count_total,
+      a.image_url,
       a.ignored,
       a.created_at,
       a.updated_at,
@@ -162,7 +190,7 @@ export const getAllAlbumsWithArtistsIncludingIgnoredService = async () => {
 
   try {
     const result = await pool.query(query);
-    return result.rows;
+    return result.rows.map(formatAlbumWithNestedArtist);
   } catch (error) {
     throw new Error(`Error fetching all albums: ${error.message}`);
   }
