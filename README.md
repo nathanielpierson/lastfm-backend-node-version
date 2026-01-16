@@ -24,13 +24,8 @@ Last.fm’s API returns album play counts like this:
 - “Top albums in the past 3 months”
 - “Top albums in the past 6 months”
 
-Each request is isolated. There is no built-in way to answer questions like:
-
-- How much did I listen to this album in the last 3 months compared to 6 months?
-- Which albums are consistently played across all time ranges?
-- How does short-term listening compare to long-term habits?
-
-To answer those questions, this backend:
+Each request is isolated. There is no built-in way to look up a specific album and return data from different periods for that specific album.
+To create a new data set that comes as close to doing such a search as possible within the confines of the API, this backend:
 
 1. Fetches album data from multiple timeframes
 2. Matches albums across responses
@@ -59,7 +54,7 @@ Each album record stores play counts across several fixed time ranges:
 - `twelve_month`
 - `play_count_total`
 
-These values are not native to Last.fm as a single dataset — they are derived by combining multiple API responses.
+These values are not native to Last.fm as a single dataset — they are derived by combining multiple API responses. (However, these 6 options are the only time frames the API allows for you to search by.)
 
 ---
 
@@ -148,5 +143,5 @@ This backend was built to demonstrate:
 
 * API data aggregation beyond simple proxying
 * Handling fragmented third-party data
-* Intentional database modeling for derived metrics
+* Intentional database modeling with minimal external input
 * Clean separation of controllers, services, and persistence layers
