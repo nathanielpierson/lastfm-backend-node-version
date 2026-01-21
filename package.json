@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start:dev": "nodemon ./index.js",
+    "dev": "nodemon ./index.js",
     "start": "node index.js",
     "setup-db": "node scripts/setupDatabase.js"
   },
