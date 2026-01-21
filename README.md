@@ -17,7 +17,7 @@ This project is currently intended for local development only and exists as a po
 
 ---
 
-## Why This Backend Exists
+## The purpose of having a backend for this app
 
 Last.fm’s API returns album play counts like this:
 
