@@ -11,9 +11,11 @@ This backend solves that limitation by:
 - Making multiple Last.fm API requests across different time ranges
 - Normalizing the results into a single data model
 - Persisting derived play count data in a PostgreSQL database
-- Exposing clean, consistent album data for a frontend charting UI
+All of this data manipulation happens behind the scenes so the user gets consistent album data for a clean chart of their streams over time.
 
-This project is currently intended for local development only and exists as a portfolio piece. It may be made publicly available in the future depending on interest and available time.
+This project is a portfolio piece, but I am currently in the process of making it may be made publicly available and functioning on Render.
+Feel free to check back here as I update the project to become fully functional for all:
+https://lastfm-charting-app-frontend.onrender.com
 
 ---
 
