@@ -1,4 +1,4 @@
-# Last.fm Album Timeframe Aggregation – Backend
+# Last.fm Album Charting App – Backend
 
 ## Overview
 
