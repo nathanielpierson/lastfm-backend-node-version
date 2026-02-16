@@ -1,5 +1,4 @@
 import express from "express";
-import { getWeeklyAlbumChart } from "../controllers/userWeeklyAlbumChartController.js";
 import { getTopAlbums } from "../controllers/userGetTopAlbumsController.js";
 import {
   createLocalAlbumData,
@@ -12,7 +11,6 @@ import {
 } from "../controllers/artistController.js";
 
 const router = express.Router();
-router.get("/weeklychart", getWeeklyAlbumChart);
 router.get("/usertopalbums", getTopAlbums);
 router.post("/localalbumdata", createLocalAlbumData);
 router.get("/localalbumdata", getLocalAlbumData);
