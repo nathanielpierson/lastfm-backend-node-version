@@ -9,6 +9,9 @@
 ### Root
 - `GET /` - Health check (returns "🎵 Last.fm Proxy API is running!")
 
+### One-time database setup (no shell needed)
+- `GET /api/setup-db?secret=YOUR_SETUP_SECRET` - Runs the migration to create `artists` and `albums` tables. Set `SETUP_SECRET` in your backend env (e.g. on Render), then visit this URL once. Safe to run multiple times.
+
 ---
 
 ## Artist Routes (from `artistRoutes.js`)
