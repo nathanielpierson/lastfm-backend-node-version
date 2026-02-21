@@ -1,23 +1,4 @@
-import { Pool } from "pg";
-
-// Configure database connection
-let pool;
-
-if (process.env.DATABASE_URL) {
-  // Use connection string if provided
-  pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-  });
-} else {
-  // Use individual parameters
-  pool = new Pool({
-    host: process.env.DB_HOST || "localhost",
-    port: process.env.DB_PORT || 5432,
-    database: process.env.DB_NAME || "lastfm_api_project_db",
-    user: process.env.DB_USER || "postgres",
-    password: process.env.DB_PASSWORD || "",
-  });
-}
+import { pool } from "../config/database.js";
 
 export const createLocalAlbumDataService = async (albumData) => {
   const {
