@@ -1,38 +1,7 @@
--- Migration script to add image_url column to existing albums table
--- This script is safe to run multiple times
+-- Migration script: safe to run multiple times.
+-- Order: create tables first, then add columns for existing DBs, then indexes.
 
--- Add image_url column to albums table if it doesn't exist
-DO $$ 
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'albums' AND column_name = 'image_url'
-    ) THEN
-        ALTER TABLE albums ADD COLUMN image_url TEXT;
-        RAISE NOTICE 'Added image_url column to albums table';
-    ELSE
-        RAISE NOTICE 'image_url column already exists in albums table';
-    END IF;
-END $$;
-
--- Add ignored column to albums table if it doesn't exist
-DO $$ 
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'albums' AND column_name = 'ignored'
-    ) THEN
-        ALTER TABLE albums ADD COLUMN ignored BOOLEAN DEFAULT FALSE;
-        RAISE NOTICE 'Added ignored column to albums table';
-    ELSE
-        RAISE NOTICE 'ignored column already exists in albums table';
-    END IF;
-END $$;
-
--- Create index on ignored column if it doesn't exist
-CREATE INDEX IF NOT EXISTS idx_albums_ignored ON albums(ignored);
-
--- Ensure the artists table exists
+-- 1. Create artists table first (albums references it)
 CREATE TABLE IF NOT EXISTS artists (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL UNIQUE,
@@ -40,10 +9,9 @@ CREATE TABLE IF NOT EXISTS artists (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Create indexes for artists if they don't exist
 CREATE INDEX IF NOT EXISTS idx_artists_name ON artists(name);
 
--- Ensure the albums table exists with all required columns
+-- 2. Create albums table with all columns
 CREATE TABLE IF NOT EXISTS albums (
   id SERIAL PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
@@ -61,8 +29,30 @@ CREATE TABLE IF NOT EXISTS albums (
   UNIQUE(title, artist_id)
 );
 
--- Create indexes for albums if they don't exist
 CREATE INDEX IF NOT EXISTS idx_albums_artist_id ON albums(artist_id);
 CREATE INDEX IF NOT EXISTS idx_albums_title ON albums(title);
 CREATE INDEX IF NOT EXISTS idx_albums_created_at ON albums(created_at);
-CREATE INDEX IF NOT EXISTS idx_albums_ignored ON albums(ignored); 
+CREATE INDEX IF NOT EXISTS idx_albums_ignored ON albums(ignored);
+
+-- 3. Add columns to existing albums tables that were created before these columns existed
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'albums' AND column_name = 'image_url'
+    ) THEN
+        ALTER TABLE albums ADD COLUMN image_url TEXT;
+        RAISE NOTICE 'Added image_url column to albums table';
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'albums' AND column_name = 'ignored'
+    ) THEN
+        ALTER TABLE albums ADD COLUMN ignored BOOLEAN DEFAULT FALSE;
+        RAISE NOTICE 'Added ignored column to albums table';
+    END IF;
+END $$;
