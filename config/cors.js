@@ -13,6 +13,7 @@ const corsOptions = {
       "http://127.0.0.1:5173",
       "http://127.0.0.1:3000",
       "http://127.0.0.1:3001",
+      "https://lastfm-charting-app-frontend.onrender.com", // Production frontend
     ];
 
     if (allowedOrigins.indexOf(origin) !== -1) {
