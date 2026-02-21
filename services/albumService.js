@@ -11,13 +11,14 @@ export const createAlbumService = async (albumData) => {
     twelve_month,
     play_count_total,
     image_url,
+    lastfm_username,
   } = albumData;
 
   const query = `
     INSERT INTO albums 
-    (title, artist_id, one_week, one_month, three_month, six_month, twelve_month, play_count_total, image_url)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-    ON CONFLICT (title, artist_id) DO UPDATE SET
+    (title, artist_id, one_week, one_month, three_month, six_month, twelve_month, play_count_total, image_url, lastfm_username)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    ON CONFLICT (title, artist_id, lastfm_username) DO UPDATE SET
       one_week = EXCLUDED.one_week,
       one_month = EXCLUDED.one_month,
       three_month = EXCLUDED.three_month,
@@ -39,6 +40,7 @@ export const createAlbumService = async (albumData) => {
     twelve_month,
     play_count_total,
     image_url,
+    lastfm_username ?? null,
   ];
 
   try {
@@ -71,8 +73,31 @@ const formatAlbumWithNestedArtist = (row) => {
   };
 };
 
-export const getAllAlbumsWithArtistsService = async () => {
-  const query = `
+export const getAllAlbumsWithArtistsService = async (lastfmUsername = null) => {
+  const byUser = lastfmUsername != null && lastfmUsername !== "";
+  const query = byUser
+    ? `
+    SELECT 
+      a.id,
+      a.title,
+      a.one_week,
+      a.one_month,
+      a.three_month,
+      a.six_month,
+      a.twelve_month,
+      a.play_count_total,
+      a.image_url,
+      a.ignored,
+      a.created_at,
+      a.updated_at,
+      ar.id as artist_id,
+      ar.name as artist_name
+    FROM albums a
+    JOIN artists ar ON a.artist_id = ar.id
+    WHERE a.ignored = FALSE AND (a.lastfm_username = $1 OR (a.lastfm_username IS NULL AND $1 = 'frogdunker'))
+    ORDER BY a.created_at DESC
+  `
+    : `
     SELECT 
       a.id,
       a.title,
@@ -95,7 +120,7 @@ export const getAllAlbumsWithArtistsService = async () => {
   `;
 
   try {
-    const result = await pool.query(query);
+    const result = byUser ? await pool.query(query, [lastfmUsername]) : await pool.query(query);
     return result.rows.map(formatAlbumWithNestedArtist);
   } catch (error) {
     throw new Error(`Error fetching albums: ${error.message}`);

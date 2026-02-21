@@ -66,22 +66,28 @@ curl -X POST http://localhost:3000/api/users/localalbumdata \
 
 ### 2. Get Stored Album Data (for the full comparison chart)
 ```
+GET /api/users/localalbumdata?username=LASTFM_USERNAME
 GET /api/users/localalbumdata
 ```
-**Returns:** All albums from database with **play counts per time frame** (one_week, one_month, three_month, six_month, twelve_month, play_count_total). Use this for the chart that shows album + plays under each period.
+**Query:** `username` (optional) – when set, returns only that Last.fm user’s chart; when omitted, returns all albums.
+
+**Returns:** Albums with **play counts per time frame** (one_week, one_month, three_month, six_month, twelve_month, play_count_total). Use for the chart that shows album + plays under each period.
 
 **Response shape (wrapped):** `{ status, message, data: [ { id, title, one_week, one_month, three_month, six_month, twelve_month, play_count_total, image_url, artist: { id, name }, ... } ] }`
 
 **Example:**
 ```bash
-curl http://localhost:3000/api/users/localalbumdata
+curl "http://localhost:3000/api/users/localalbumdata?username=alice"
 ```
 
 ### 3. Get Stored Album Data (Raw Format)
 ```
+GET /api/users/localalbumdata/raw?username=LASTFM_USERNAME
 GET /api/users/localalbumdata/raw
 ```
-**Returns:** Same album list as above, in raw JSON array (no status/message wrapper). Same fields: one_week, one_month, three_month, six_month, twelve_month, play_count_total, artist, etc.
+**Query:** `username` (optional) – when set, returns only that user’s chart; when omitted, returns all albums. **For /editedchart, pass the search-bar username here so the chart matches the user.**
+
+**Returns:** Same album list as above, in raw JSON array (no status/message wrapper).
 
 ### 4. Get All Artists
 ```

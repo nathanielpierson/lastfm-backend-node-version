@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS artists (
 
 CREATE INDEX IF NOT EXISTS idx_artists_name ON artists(name);
 
--- 2. Create albums table with all columns
+-- 2. Create albums table with all columns (lastfm_username = which user's chart)
 CREATE TABLE IF NOT EXISTS albums (
   id SERIAL PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
@@ -24,9 +24,10 @@ CREATE TABLE IF NOT EXISTS albums (
   play_count_total INTEGER DEFAULT 0,
   image_url TEXT,
   ignored BOOLEAN DEFAULT FALSE,
+  lastfm_username VARCHAR(255),
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
-  UNIQUE(title, artist_id)
+  UNIQUE(title, artist_id, lastfm_username)
 );
 
 CREATE INDEX IF NOT EXISTS idx_albums_artist_id ON albums(artist_id);
@@ -54,5 +55,36 @@ BEGIN
     ) THEN
         ALTER TABLE albums ADD COLUMN ignored BOOLEAN DEFAULT FALSE;
         RAISE NOTICE 'Added ignored column to albums table';
+    END IF;
+END $$;
+
+-- 4. Add lastfm_username so we can store/filter chart by user
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'albums' AND column_name = 'lastfm_username'
+    ) THEN
+        ALTER TABLE albums ADD COLUMN lastfm_username VARCHAR(255);
+        UPDATE albums SET lastfm_username = 'frogdunker' WHERE lastfm_username IS NULL;
+        RAISE NOTICE 'Added lastfm_username column to albums table';
+    END IF;
+END $$;
+
+-- 5. Replace old unique constraint with (title, artist_id, lastfm_username)
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'albums_title_artist_id_key' AND conrelid = 'albums'::regclass
+    ) THEN
+        ALTER TABLE albums DROP CONSTRAINT albums_title_artist_id_key;
+    END IF;
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'albums_title_artist_id_lastfm_username_key' AND conrelid = 'albums'::regclass
+    ) THEN
+        ALTER TABLE albums ADD CONSTRAINT albums_title_artist_id_lastfm_username_key
+          UNIQUE (title, artist_id, lastfm_username);
     END IF;
 END $$;

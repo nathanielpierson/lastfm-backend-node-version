@@ -127,6 +127,7 @@ export const createLocalAlbumData = async (req, res, next) => {
       const albumWithArtistId = {
         ...albumDataWithoutArtistName,
         artist_id: artist.id,
+        lastfm_username: username,
       };
 
       console.log("Album with artist_id:", albumWithArtistId);
@@ -149,7 +150,8 @@ export const createLocalAlbumData = async (req, res, next) => {
 
 export const getLocalAlbumData = async (req, res, next) => {
   try {
-    const albumData = await getAllAlbumsWithArtistsService();
+    const username = req.query.username ?? null;
+    const albumData = await getAllAlbumsWithArtistsService(username);
     handleResponse(
       res,
       200,
@@ -166,7 +168,8 @@ export const getLocalAlbumData = async (req, res, next) => {
 
 export const getLocalAlbumDataRaw = async (req, res, next) => {
   try {
-    const albumData = await getAllAlbumsWithArtistsService();
+    const username = req.query.username ?? null;
+    const albumData = await getAllAlbumsWithArtistsService(username);
     res.status(200).json(albumData);
   } catch (error) {
     console.error("Error fetching local album data:", error);
