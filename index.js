@@ -1,10 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import corsMiddleware from "./config/cors.js";
 import { pool } from "./config/database.js";
-import { ensureSchemaIfNeeded, runMigration } from "./config/ensureSchema.js";
 
 // Import route modules
 import artistRoutes from "./routes/artistRoutes.js";
@@ -34,7 +34,9 @@ app.get("/api/setup-db", async (req, res) => {
     return res.status(401).json({ error: "Missing or invalid secret" });
   }
   try {
-    await runMigration(pool);
+    const sqlPath = path.join(__dirname, "database", "migration.sql");
+    const sqlContent = fs.readFileSync(sqlPath, "utf8");
+    await pool.query(sqlContent);
     res.json({
       ok: true,
       message: "Database migration completed. Tables artists and albums are ready.",
@@ -50,16 +52,7 @@ app.get("/", (req, res) => {
   res.send("🎵 Last.fm Proxy API is running!");
 });
 
-async function start() {
-  try {
-    await ensureSchemaIfNeeded(pool);
-  } catch (err) {
-    console.error("Database schema check failed:", err);
-    process.exit(1);
-  }
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
-  });
-}
-
-start();
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});

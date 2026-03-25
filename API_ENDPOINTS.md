@@ -10,8 +10,7 @@
 - `GET /` - Health check (returns "🎵 Last.fm Proxy API is running!")
 
 ### One-time database setup (no shell needed)
-- On **deploy**, if the database has no `albums` table yet, the server **runs `migration.sql` automatically** (e.g. after you point `DATABASE_URL` at a new Render Postgres).
-- `GET /api/setup-db?secret=YOUR_SETUP_SECRET` - Runs the full migration manually (same file). Use if you need to re-apply schema changes. Set `SETUP_SECRET` in your backend env. Safe to run multiple times.
+- `GET /api/setup-db?secret=YOUR_SETUP_SECRET` - Runs the migration to create `artists` and `albums` tables. Set `SETUP_SECRET` in your backend env (e.g. on Render), then visit this URL once. Safe to run multiple times.
 
 ---
 
