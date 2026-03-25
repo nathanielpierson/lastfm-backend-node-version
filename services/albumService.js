@@ -94,7 +94,7 @@ export const getAllAlbumsWithArtistsService = async (lastfmUsername = null) => {
       ar.name as artist_name
     FROM albums a
     JOIN artists ar ON a.artist_id = ar.id
-    WHERE a.ignored = FALSE AND (a.lastfm_username = $1 OR (a.lastfm_username IS NULL AND $1 = 'frogdunker'))
+    WHERE a.ignored = FALSE AND (LOWER(TRIM(COALESCE(a.lastfm_username, ''))) = $1 OR (a.lastfm_username IS NULL AND $1 = 'frogdunker'))
     ORDER BY a.created_at DESC
   `
     : `
