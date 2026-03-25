@@ -5,7 +5,7 @@ export async function fetchRecentTracks(username, period) {
   const API_KEY = process.env.LASTFM_API_KEY;
   const SHARED_SECRET = process.env.LASTFM_SHARED_SECRET;
   var limit = 150;
-  if (period === "6month") {
+  if (period === "six month") {
     limit = 400;
   } else if (period === "overall") {
     limit = 800;

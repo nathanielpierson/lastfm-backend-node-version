@@ -27,27 +27,8 @@ const extractMediumImageUrl = (album) => {
   return null;
 };
 
-/** Last.fm returns one album as an object, many as an array — always normalize to an array. */
-function normalizeTopAlbumsAlbum(albumOrList) {
-  if (albumOrList == null) return [];
-  return Array.isArray(albumOrList) ? albumOrList : [albumOrList];
-}
-
-function normalizeQueryUsername(q) {
-  if (q == null || q === "") return null;
-  return String(q).trim().toLowerCase();
-}
-
 export const createLocalAlbumData = async (req, res, next) => {
-  const rawUsername = req.body?.username;
-  const username =
-    typeof rawUsername === "string" ? rawUsername.trim().toLowerCase() : "";
-
-  if (!username) {
-    return res.status(400).json({
-      error: "username is required in the request body",
-    });
-  }
+  const { username } = req.body;
 
   try {
     // Define the period mappings
@@ -65,16 +46,11 @@ export const createLocalAlbumData = async (req, res, next) => {
     for (const mapping of periodMappings) {
       try {
         const data = await fetchRecentTracks(username, mapping.period);
-        if (data.error) {
-          console.error(
-            `Last.fm error for period ${mapping.period}:`,
-            data.message || data
-          );
-          periodData[mapping.period] = [];
-          continue;
-        }
-        const albums = normalizeTopAlbumsAlbum(data.topalbums?.album);
-        periodData[mapping.period] = albums;
+        console.log(
+          `Data for period ${mapping.period}:`,
+          JSON.stringify(data, null, 2)
+        );
+        periodData[mapping.period] = data.topalbums.album;
       } catch (error) {
         console.error(
           `Error fetching data for period ${mapping.period}:`,
@@ -96,10 +72,7 @@ export const createLocalAlbumData = async (req, res, next) => {
 
         // Check if album.title exists, if not try album.name
         const albumTitle = album.title || album.name;
-        const artistName =
-          typeof album.artist === "string"
-            ? album.artist
-            : album.artist?.name || album.artist?.["#text"];
+        const artistName = album.artist?.name || album.artist;
 
         if (!albumTitle || !artistName) {
           console.warn("Skipping album with missing title or artist:", album);
@@ -163,15 +136,10 @@ export const createLocalAlbumData = async (req, res, next) => {
       savedAlbums.push(savedAlbum);
     }
 
-    const payload = {
+    handleResponse(res, 201, "Local album data created successfully", {
       totalAlbums: savedAlbums.length,
       albums: savedAlbums,
-    };
-    if (savedAlbums.length === 0) {
-      payload.hint =
-        "Last.fm returned no top albums for this user. Check the username and that the account has public scrobbles.";
-    }
-    handleResponse(res, 201, "Local album data created successfully", payload);
+    });
   } catch (error) {
     console.error("Error creating local album data:", error);
     handleResponse(res, 500, "Error creating local album data", {
@@ -182,7 +150,7 @@ export const createLocalAlbumData = async (req, res, next) => {
 
 export const getLocalAlbumData = async (req, res, next) => {
   try {
-    const username = normalizeQueryUsername(req.query.username);
+    const username = req.query.username ?? null;
     const albumData = await getAllAlbumsWithArtistsService(username);
     handleResponse(
       res,
@@ -200,7 +168,7 @@ export const getLocalAlbumData = async (req, res, next) => {
 
 export const getLocalAlbumDataRaw = async (req, res, next) => {
   try {
-    const username = normalizeQueryUsername(req.query.username);
+    const username = req.query.username ?? null;
     const albumData = await getAllAlbumsWithArtistsService(username);
     res.status(200).json(albumData);
   } catch (error) {
