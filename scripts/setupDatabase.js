@@ -1,22 +1,12 @@
 import "dotenv/config";
 import { pool } from "../config/database.js";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { runMigrationStatements } from "../config/ensureSchema.js";
 
 async function setupDatabase() {
   try {
     console.log("🔧 Setting up database...");
 
-    // Read the migration SQL file (handles both new and existing databases)
-    const sqlPath = path.join(__dirname, "..", "database", "migration.sql");
-    const sqlContent = fs.readFileSync(sqlPath, "utf8");
-
-    // Execute the migration SQL
-    await pool.query(sqlContent);
+    await runMigrationStatements(pool);
 
     console.log("✅ Database migration completed successfully!");
     console.log('📊 Tables "artists" and "albums" are ready.');
