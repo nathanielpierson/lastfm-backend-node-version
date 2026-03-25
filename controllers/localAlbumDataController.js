@@ -50,7 +50,18 @@ export const createLocalAlbumData = async (req, res, next) => {
           `Data for period ${mapping.period}:`,
           JSON.stringify(data, null, 2)
         );
-        periodData[mapping.period] = data.topalbums.album;
+        if (data.error) {
+          console.error(
+            `Last.fm error for period ${mapping.period}:`,
+            data.message || data.error
+          );
+          periodData[mapping.period] = [];
+          continue;
+        }
+        const raw = data.topalbums?.album;
+        const albums =
+          raw == null ? [] : Array.isArray(raw) ? raw : [raw];
+        periodData[mapping.period] = albums;
       } catch (error) {
         console.error(
           `Error fetching data for period ${mapping.period}:`,
