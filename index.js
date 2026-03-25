@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import dotenv from "dotenv";
 import fs from "fs";
@@ -5,6 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import corsMiddleware from "./config/cors.js";
 import { pool } from "./config/database.js";
+import { ensureSchemaIfNeeded } from "./config/ensureSchema.js";
 
 // Import route modules
 import artistRoutes from "./routes/artistRoutes.js";
@@ -52,7 +54,16 @@ app.get("/", (req, res) => {
   res.send("🎵 Last.fm Proxy API is running!");
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
+async function start() {
+  try {
+    await ensureSchemaIfNeeded(pool);
+  } catch (err) {
+    console.error("Database setup failed (check DATABASE_URL on Render):", err);
+    process.exit(1);
+  }
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+  });
+}
+
+start();
