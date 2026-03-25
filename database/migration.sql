@@ -1,8 +1,5 @@
 -- Migration script: safe to run multiple times.
 -- Order: create tables first, then add columns for existing DBs, then indexes.
---
--- Runtime migrations use the same statements in config/ensureSchema.js (sequential
--- execution). Update both when changing schema.
 
 -- 1. Create artists table first (albums references it)
 CREATE TABLE IF NOT EXISTS artists (
