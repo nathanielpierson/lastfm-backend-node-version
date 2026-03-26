@@ -14,8 +14,7 @@ export async function fetchRecentTracks(username, period) {
     throw new Error("Last.fm user is missing or empty.");
   }
 
-  const limit =
-    period === "6month" ? 400 : period === "overall" ? 800 : 250;
+  const limit = 100;
 
   const params = {
     method: "user.getTopAlbums",
